@@ -1,9 +1,30 @@
 \section{Introduction}
 
-System on chips (SoCs) with embedded field programmable gate arrays (FPGAs) have emerged as a cost effective solution for systems where high performance and minimal physical size are important factors. Unfortunately several challenges when designing with these platforms. First and foremost, the SoCs are often equipped with hundreds of pins, making PCB design a daunting task. In addition the ball grid arrays often end up requiring a PCB with more than 4 layers. This increases the cost and decreases the time in which prototype PCBs can be manufactured.
+\subsection{Background}
 
-This paper will explore the gains by opting for a SoC module instead of a directly embedded SoC, as well as possible pitfalls and a comparison of the performance for the two solutions.
+In our digital world, the demand for computing platforms with higher performance and smaller footprints increases on a daily basis. In later years a class of integrated circuits (ICs) has emerged as the go-to solution for embedded devices where performance, features and small form factor are important parameters, System on Chips (SoCs).
 
-Also included in this paper will be a case study of such a system design performed for Revolve NTNU.
+SoCs are fully fledged computer platforms with the necessary memory and storage for operation and powerful periferals like Field Programmeable Gate Arrays (FPGAs) or modems for wireless communication like WiFi, Bluetooth and ZigBee. All of this is packaged on a single chip, thereby the name. In contrast to traditional microcontrollers which has been a favourite in the embedded landscape for decades, SoCs pack a bigger punch. They are equipped with more powerful microprocessors, sometimes even multiprocessors. This makes them a sought after platform for applications where high throughput are crucial, like aerospace, automotive, signal processing, communication, multimedia and military use.
 
-Note that this document may be appliable to other SoCs with a ball grid array package, but here we will look specifically at SoCs with FPGAs.
+There are however downsides to SoCs, and most of them are caused by the biggest strengths of SoCs, high performance, many features and small form factor. As the number of pins on the SoC package grows and the size decreases, the spacing between pins shrink to almost nothing. This has led to the introduction of so called ball grid arrays (BGAs). These are dense patterns of connectors located on the bottom of the IC packaging, instead of on the tradition side placement. This turns out to be a big challenge when designing the printed circuit board (PCB) for the embedded system. The clearance between each connector and the placement requires PCBs with 6, 8 or more layers more often than not. It is true that the manufacturing cost for such board has decreased drastically over the last years as the number of PCB houses has increased and equipment costs have plummeted. However, the prices for such circuit boards are enormous when compared to more conventional 2 or 4 layer PCBs and, more importantly, debugging such advanced PCBs is extremely challenging and may slow down the development and prototyping phase of product development. Time-to-market is an increasingly important factor when developing embedded systems, as the market is highly competitive and disruptive. 
+
+Another issue is the required skill of the engineers that must develop and maintain the schematics and layouts for the PCBs...
+
+About System on Modules (SoMs)...
+
+\subsection{Scope}
+
+This paper will explore the process of designing, implementing and testing an embedded system previously powered by a SoC, with a SoM. A case study will be performed in cooperation with Revolve NTNU, a Formula Student team that spends one year designing, building and testing an electric race car, before attending multiple international competitions during the summer where they face off against teams from other universities worldwide.
+
+This setting makes for an ideal environment to look at the entire product development process, as the product must be quickly prototyped, verified and produced, and the deadlines are absolute. Without a functioning embedded system on the car, the team cannot compete.
+
+
+\subsection{Outline}
+
+The paper will begin with some theory related to the design and manufacture of PCBs for SoCs and SoMs. This includes some electronics, but the main focus will be on the product development.
+
+Then the exact embedded system and the process of designing, testing and manufacturing will be discussed.
+
+Next there will be an analysis of the data gathered during the product design  process as well as results. 
+
+And to finish off there will be a discussion of the aforementioned data and results.

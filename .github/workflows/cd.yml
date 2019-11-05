@@ -1,0 +1,16 @@
+name: CD
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Compile LaTeX
+      uses: dante-ev/latex-action@v0.2.0
+      with:
+        root_file: main.tex 
+    

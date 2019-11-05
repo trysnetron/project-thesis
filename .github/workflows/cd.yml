@@ -13,4 +13,12 @@ jobs:
       uses: dante-ev/latex-action@v0.2.0
       with:
         root_file: main.tex 
+    - name: Move PDF to public folder
+      run: mv ./main.pdf ./public/project-thesis-trymsneltvedt.pdf
+    - name: Publish to Github Pages
+      uses: peaceiris/actions-gh-pages@v2.0.0
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./public
     

@@ -1,0 +1,22 @@
+\section{Results}
+
+\subsection{Electrical performance}
+
+\emph{Current draw, resilliance to noise on power supply... Compare to VCU 2019?}
+
+\subsection{Computational performance}
+
+\emph{Is this even interresting? Better SoC gives better performance}
+
+\subsection{Design process}
+
+By reusing software and hardware design from last year's design, issues were reduced to a minimum.
+
+The electronic design automation \emph{(EDA)} software used for schematics and pcb layout, \emph{Altium Nexus} supports multiple features which shortened the design process significantly. Firstly, since VCU19 used \emph{hierarchical design} (i.e. project is composed of multiple sheets and subsheets), large parts of the schematics developed during last years design period could be reused. 
+
+Simple subcircuits like CAN-FD transcievers could be directly copied without issue. In addition, the subsheets are modular in the sense that they appear as an electrical component with a specific set of interfaces, or \emph{ports}. This means that sheet using the same set of ports can be intechanged freely. The modularity of the sheets was heavily used during the development of VCU20. The new processing unit features a superset of the VCU19 SoC interface, meaning they are perfectly compatible. 
+
+There is also the possibility of reusing sheets in the same project. VCU20 has 4 CAN-FD transcievers, but since the transciever schematic is identical for all 4 interfaces, the sheet can simply be repeated. 
+
+There are also features for reuse in the PCB layout part of the design. Altium Nexus has a feature called \emph{rooms} which is a grouping of component footprints and how they are connected. It is possible to copy the layout if a room to other rooms. The designer chooses how rooms are generated, and by default they are created per sheet. This means that the layout for one CAN-FD transciever can be perfected and then copied over to the other 3 transciever rooms.
+

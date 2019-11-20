@@ -6,27 +6,16 @@ In our digital world, the demand for computing platforms with higher performance
 
 SoCs are fully fledged computer platforms with the necessary memory and storage for operation and powerful peripherals like field programmeable gate arrays (FPGAs) or modems for wireless communication like WiFi, Bluetooth and ZigBee. All of this is packaged on a single chip, thereby the name. In contrast to traditional microcontrollers which has been a favourite in the embedded landscape for decades, SoCs pack a bigger punch. They are equipped with more powerful microprocessors, sometimes even multiprocessors. This makes them a sought after platform for applications where high throughput are crucial, like aerospace, automotive, signal processing, communication, multimedia and military use.
 
-There are however downsides to SoCs, and most of them are caused by the biggest strengths of SoCs, high performance, many features and small form factor. As the number of pins on the SoC package grows and the size decreases, the spacing between pins shrink to almost nothing. This has led to the introduction of so called ball grid arrays (BGAs). These are dense patterns of connectors located on the bottom of the IC packaging, instead of on the tradition side placement. This turns out to be a big challenge when designing the printed circuit board (PCB) for the embedded system. The clearance between each connector and the placement requires PCBs with 6, 8 or more layers more often than not. It is true that the manufacturing cost for such board has decreased drastically over the last years as the number of PCB houses has increased and equipment costs have plummeted. However, the prices for such circuit boards are enormous when compared to more conventional 2 or 4 layer PCBs and, more importantly, debugging such advanced PCBs is extremely challenging and may slow down the development and prototyping phase of product development. Time-to-market is an increasingly important factor when developing embedded systems, as the market is highly competitive and disruptive. 
+A downside to the increased complexity of the electronics and the demands for smaller devices is the packaging of ICS. Integrated circuits with a high pin count very often use ball grid array (BGA) packages. These are ICs with the connectors placed in a dense grid on the bottom of the packaging, instead of on the tradition side placement. While very space efficient, this way of connecting ICs to printed circuit boards (PCBs) introduces several challenges for hardware designers. Firstly, the clearance between each pin requires PCBs with more than 2 layers. Tradition methods of PCB manufacture like copper etching or milling is only possible (or proctical) for 2 layer boards. This means prototypes has to be produced at larger production factories that has the expensive equipment available. Multi-layer boards are also more expensive. It is true that the manufacturing cost and lead time for PCBs has decreased drastically over the last years with the technological advances made, but it still imposes a high cost and increases the time to market. Another important factor is debugging. Advanced multi-layer PCBs are challenging to debug and slows down the development and prototyping phase of product development. Time-to-market is an increasingly important factor when developing embedded systems, as the market is highly competitive and disruptive. 
 
-Another issue is the required skill of the engineers that must develop and maintain the schematics and layouts for the PCBs...
+\emph{About System on Modules (SoMs)...}
 
-About System on Modules (SoMs)...
 
 \subsection{Scope}
 
-This report explores the process of designing, implementing and testing an embedded system previously powered by a SoC, with a SoM. It details A case study was performed in cooperation with Revolve NTNU, a Formula Student team that spends 8 months designing, building and testing an electric race car, before attending multiple international competitions during the summer where they face off against teams from other universities worldwide. 
+This report explores the process of designing, implementing and testing an embedded system previously powered by a SoC, with a SoM. A case study was performed in cooperation with Revolve NTNU, a Formula Student team that spends one year designing, building and testing an electric race car, before attending multiple international competitions during the summer where they face off against teams from other universities worldwide.
 
-The system that was implemented was the vehicle control unit (VCU), the main control system of the car which is responsible for, among other things, controlling the speed of each of the car's four electric motors.
-
-This setting makes for an ideal environment to look at the entire product development process, as the product must be quickly prototyped, verified and produced, and the deadlines are absolute. Without a functioning VCU, the car cannot function.
+The automotive setting makes for an ideal environment to look at the entire product development process, as the product must be quickly prototyped, verified and produced, and the deadlines are absolute. The vehicle is useless without a functioning control system.
 
 
 \subsection{Outline}
-
-The paper will begin with some theory related to the design and manufacture of PCBs for SoCs and SoMs. This includes some electronics, but the main focus will be on the product development.
-
-Then the exact embedded system and the process of designing, testing and manufacturing will be discussed.
-
-Next there will be an analysis of the data gathered during the product design  process as well as results. 
-
-And to finish off there will be a discussion of the aforementioned data and results.

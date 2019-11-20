@@ -1,2 +1,45 @@
 \section{Theory}
 
+When opting for a SoM for your embedded system, it is necessary to take the requirements of your system into account, and make sure your chosen SoM is capable of meeting your demands. This section discusses different features often made available on SoM's, and finishes with a comparison of several SoM's currently available on the market.
+
+\subsection{Processing unit}
+
+The processing unit is the core of the module. It is common for SoM's to utilize SoC's as their processing units, giving access to both powerful processing platforms and peripherals like programmeable logic and wireless communications.
+
+\subsection{Random access memory}
+
+High speed external memory serves as a peritculary challenging task for hardware designers, as they call for high speed signaling, introducing concepts like \emph{differential signaling}, \emph{impedance matching} and \emph{fan-out} to the PCB layout. Having sufficient RAM on the SoM is therefore a big advantage.
+
+\subsection{Non-volatile memory}
+
+When running an advanced embedded system, there might be a need for a fully fledged operating system (i.e Android for multimedia or Xenomai for real time applications). This makes it necessary with more persistent storage than in conventional embedded systems. Most commercialy available SoM's feature some sort of non-volatile memory. the most common types are NAND flash and eMMC flash.
+
+\subsection{Power electronics}
+
+Advanced SoC's often require \emph{power sequencing} of some sort. There might be different voltage levels for internal logic and I/O pins, and the voltages has to be enabled in a specific order. This means that the hardware designer has to have dedicated circuitry for different voltage levels. This would often be switching DC-DC convertert or linear regulators. It is common for a SoC to require 3 or more different voltage levels [ref Zynq 7000 datasheet]. If the remaining design cannot use all of these voltage levels, they are essentially additional complexity which increases the cost and design time of the system.
+
+\subsection{Ethernet}
+
+\subsection{Gigabit transcievers}
+
+\subsection{Universal Serial Bus}
+
+\subsection{SoM comparison}
+
+Table X shows and compares a small set of commercially available SoM's.
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{ r | c c c c }
+                          & Processing unit        & RAM       & Flash                      & Unit price \\ 
+    Enclustra Mercury SA1 & Altera Cyclone® V ARM® & 1GB DDR3L & 16GB eMMC flash            & \$ 356     \\  
+    Enclustra Mercury ZX5 & Xilinx Zynq 7000       & 1GB DDR3L & 512MB NAND flash           & \$ 370     \\
+    Avnet PicoZed         & Xilinx Zynq 7000       & 1GB DDR3  & 4GB eMMC, 128Mb QSPI flash & \$ 265     \\  
+  \end{tabular}
+  \caption{SoM comparison}
+  \label{tab:som_comparison}
+\end{table}
+
+
+  
+

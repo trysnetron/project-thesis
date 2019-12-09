@@ -1,45 +1,112 @@
 \section{Theory}
 
-When opting for a SoM for your embedded system, it is necessary to take the requirements of your system into account, and make sure your chosen SoM is capable of meeting your demands. This section discusses different features often made available on SoM's, and finishes with a comparison of several SoM's currently available on the market.
+\subsection{Ball grid array PCB layout}
 
-\subsection{Processing unit}
+Ball grid array (\emph{BGA}) refers to a packaging type used for surface mount IC's. BGA packages feature all interconnects on the bottom of the package and allows for a higher number of connected pins than with pins on the edges of the package, see figure \ref{fig:clg255}.
 
-The processing unit is the core of the module. It is common for SoM's to utilize SoC's as their processing units, giving access to both powerful processing platforms and peripherals like programmeable logic and wireless communications.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.75\textwidth]{media/CLG225.JPG}
+    \caption{CLG255, a 15-by-15 pin BGA package used by the Zynq-7000 series SoC's \cite{clg225}}
+    \label{fig:clg255}
+\end{figure}
 
-\subsection{Random access memory}
-
-High speed external memory serves as a peritculary challenging task for hardware designers, as they call for high speed signaling, introducing concepts like \emph{differential signaling}, \emph{impedance matching} and \emph{fan-out} to the PCB layout. Having sufficient RAM on the SoM is therefore a big advantage.
-
-\subsection{Non-volatile memory}
-
-When running an advanced embedded system, there might be a need for a fully fledged operating system (i.e Android for multimedia or Xenomai for real time applications). This makes it necessary with more persistent storage than in conventional embedded systems. Most commercialy available SoM's feature some sort of non-volatile memory. the most common types are NAND flash and eMMC flash.
-
-\subsection{Power electronics}
-
-Advanced SoC's often require \emph{power sequencing} of some sort. There might be different voltage levels for internal logic and I/O pins, and the voltages has to be enabled in a specific order. This means that the hardware designer has to have dedicated circuitry for different voltage levels. This would often be switching DC-DC convertert or linear regulators. It is common for a SoC to require 3 or more different voltage levels [ref Zynq 7000 datasheet]. If the remaining design cannot use all of these voltage levels, they are essentially additional complexity which increases the cost and design time of the system.
-
-\subsection{Ethernet}
-
-\subsection{Gigabit transcievers}
-
-\subsection{Universal Serial Bus}
-
-\subsection{SoM comparison}
-
-Table X shows and compares a small set of commercially available SoM's.
-
-\begin{table}[h!]
-  \centering
-  \begin{tabular}{ r | c c c c }
-                          & Processing unit        & RAM       & Flash                      & Unit price \\ 
-    Enclustra Mercury SA1 & Altera Cyclone® V ARM® & 1GB DDR3L & 16GB eMMC flash            & \$ 356     \\  
-    Enclustra Mercury ZX5 & Xilinx Zynq 7000       & 1GB DDR3L & 512MB NAND flash           & \$ 370     \\
-    Avnet PicoZed         & Xilinx Zynq 7000       & 1GB DDR3  & 4GB eMMC, 128Mb QSPI flash & \$ 265     \\  
-  \end{tabular}
-  \caption{SoM comparison}
-  \label{tab:som_comparison}
-\end{table}
+As the pins are hidden when the package is mounted on a PCB, BGA packages are must be soldered by other methods than classical hand-soldering. Reflow soldering is a popular method for soldering BGA's where the entire package and adhering PCB are heated to the point where all the solder melts. This is typically performed in a dedicated reflow soldering oven, but can also be performed using a hot-air gun or similar.
 
 
-  
+\subsection{CAN-FD}
 
+The different embedded systems on the vehicle communicate with each other using CAN-FD. CAN, or \emph{controller area network} is a network bus developed by Bosch. It has been the de-facto standard communication platform for automotive applications since the mid-1990's. An improved version, CAN-FD (flexible data-rate) was released by Bosh in 2012, it differs from CAN in that the body of each message (called \emph{frames} for CAN) are transmitted at a higher frequency than the header and the allowed frame size increases from 8 to 64 bytes. This is the communication bus currently used at Revolve NTNU.
+
+CAN and CAN-FD is a one-to-many bus system where each frame is given an identifier which determines the priority of the frame. When the bus is free, all connected devices can begin transmitting their frame, but the frame with the highest priority will take precedence on the bus. When a frame is transmitted on the bus, any connected device are able to read it. When the frame has successfully been transmitted the bus is again free and a new transmission can begin.
+
+\subsubsection{CAN-FD bus utilization}
+
+Almost all messages sent over the CAN-FD bus are sent at a regular interval. The size of the different messages are also known, this means that we know how long each message will occupy the bus for. These facts means that the frames on the bus can be modelled in the same way as tasks in a rate-monotonic scheduled system, known from real-time theory. This means the standard formula for utilization can be used when analyzing CAN and CAN-FD buses. The equation for utilization $U$ on a bus is given in equation \ref{eq:utilization}. 
+
+\begin{equation}
+    U=\sum_{i=1}^N\frac{C_i}{T_i}
+    \label{eq:utilization}
+\end{equation}
+
+$C_i$ is the execution time and $T_i$ is the execution period for task $i$. In our case this is translated to the time frame $i$ is active on the bus and the period at which it should be transmitted. 
+
+
+\subsubsection{Maximum utilization}
+
+We can use the \emph{Utilization-based schedulability test} to determine whether all deadlines are met for a set of tasks. The criteria can be seen in equation \ref{eq:utilization_criteria}. It is important to note that this test is sufficient but not necessary. This means that a passing test guarantees all deadlines are met but a failing test does not guarantee missed  deadlines.
+
+\begin{equation}
+    U=\sum_{i=1}^N\frac{C_i}{T_i}\leq N\left(2^\frac{1}{N}-1\right)
+    \label{eq:utilization_criteria}
+\end{equation}
+
+$N$ denotes the number of different tasks being scheduled. Since the number of different messages on the CAN-FD buses is quite high, we might as well look at what happens to the criteria when $N$ goes towards infinity.
+
+\begin{equation}
+    \lim_{N\rightarrow\infty} N\left(2^\frac{1}{N}-1\right)=\ln{2}\approx 0.693
+    \label{eq:utilization_criteria_calc}
+\end{equation}
+
+From equation \ref{eq:utilization_criteria_calc} we can deem that as long as the bus load on each of the CAN-FD buses are below 69.3\%, no messages are lost. This does of course not mean that the vehicle becomes unusable, figure \ref{fig:canfd_load} shows that the load was above the the limit for both buses, and the vehicle worked fine. The embedded systems are naturally made to be resilient to frame loss.
+
+However, the limit serves as a good target for max bus load, and we will work towards lowering bus load to below this limit.
+
+
+
+
+The high load on the CAN-FD buses poses one of the big challenges with the current system. We want a mathematical model of the load on the CAN-FD buses which can tell us whether messages will be lost or not.
+
+\subsubsection{Rate-Monotonic Scheduling}
+
+As the messages sent over the CAN-FD buses are sent at a somewhat regular interval, the buses can be modeled as a rate-monotonic scheduled (RMS) system. This is a way to model the scheduling of software tasks when the tasks are run at a set interval and with a fixed execution time. We begin by looking at the equation for utilization used with RMS.
+
+
+
+Equation \ref{eq:utilization} shows how utilization is calculated for tasks, i.e. how much of the time that a task executes on a single core processor. 
+
+\subsubsection{CAN-FD utilization}
+
+From the RMS utilization equation we know that we need the execution time $C$ and period $T$ for each task. While the period for each CAN-FD message is easy to determine, the execution time takes slighly more effort.From now on we will call the execution time for a message $m$ the \emph{transmission time} and we will denote it $C_m$. For a standard CAN message it would be sufficient to divide the number of bits in the message by the operating frequency of the bus. This is made slightly more difficult as CAN-FD operates on two different frequencies, one for header transmission and one for data transmission. We can split look at the total transmission time as a sum of the transmission time for each of the frequencies , see equation \ref{eq:canfd_cm}.  
+
+\begin{equation}
+    C_m=T_s+T_f
+    \label{eq:canfd_cm}
+\end{equation}
+
+$T_s$, the transmission time for the message header is a constant number of bits, how it is calculated can be seen in equation \ref{eq:canfd_ts}.
+
+\begin{equation}
+    \begin{gathered}
+        T_s=\frac{(SOF+ID+r1+IDE+EDL+r0+\frac{BRS}{2}+\frac{CRCdel}{2})\cdot1.2}{t_x}\\+\frac{ACK+DEL+EOF+IFS}{t_x}
+    \end{gathered}
+    \label{eq:canfd_ts}
+\end{equation}
+
+The different equations can be seen in equation \ref{eq:canfd_tf}.
+
+\begin{equation}
+    T_f=\frac{(D_f+\frac{BRS}{2}+ESI+DLC+\frac{CRCdel}{2})\cdot1.2+CRC+BS}{t_y}
+    \label{eq:canfd_tf}
+\end{equation}
+
+Because of error detection mechanisms defined in the CAN-FD protocol, the transmission time for payloads larger than 16 bytes is different from payloads smaller than 16 bytes. For payloads smaller than 16 bytes the Cyclic Redundancy Check ($CRC$) is 17 bits and the Bit Stuffing ($BS$) is 5 bits. For payloads larger than 16 bits, $CRC$ rises to 21 bits and $BS$ to 6 bits.
+
+
+\begin{equation}
+    U=\sum_m\frac{C_m}{T_m}
+    \label{eq:canfd_busload}
+\end{equation}
+
+We will also 
+
+To make reflected decisions about the CAN-FD buses on the vehicle, we need mathematical tools to look at the worst case bus load. Equation \ref{eq:canfd_busload} shows the equation we will use to determine the utilization, or load, $U$ on the CAN-FD bus. $C_m$ is the worst case transmission time (WCTT) for a message $m$ while $T_m$ is the period of message $m$, i.e. how often it is transmitted. It is of course necessary to compute the load from each of the different messages on the bus to be able to calculate the load.
+
+
+
+WCTT is pretty straight forward to calculate, but it needs some explanation. What separates CAN-FD from CAN is flexible data-rate (FD). This means that the header or metadata of each frame is transmitted at a lower frequency, just like for CAN, but the payload of the frame is transmitted at a higher frequency, here called $t_y$, while the slower transmission rate is called $t_x$. The total WCTT for a message can be seen as a sum of the worst case time for the header transmission and the higher speed payload transmission, see equation \ref{eq:canfd_cm}.
+
+
+\subsection{Differential signalling}
+
+When dealing with high-speed, low-power signals in electronic systems, minimizing noise is of the utmost importance. One technique for dealing with this is \emph{differential signalling}. Simply put, it means driving two conductors instead of just one. Single-ended signalling, the conventional method, means that signalling lines are referenced to a common ground. In differential signalling, two lines are used for each signal line. These lines are referenced to each other instead of to a ground shared by all signals. This serves to remove noise that might be present on the ground plane and, when the two conductors are placed close to each other, excellent protection against external interference. When the lines are close to each other, electromagneting fields that normally would introduce noise to the signal will optimally affect both conductors by the same amount, and since we only look at the difference between the two lines, the noise is elegantly subtracted away.

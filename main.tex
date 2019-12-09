@@ -1,21 +1,75 @@
-\documentclass[9pt]{article}
+\documentclass[11pt]{article}
 
 % Packages
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage[a4paper, margin=3cm]{geometry}
 \usepackage{lingmacros}
 \usepackage{tree-dvips}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{siunitx}
+
+\usepackage[backend=biber,style=numeric,sorting=ynt]{biblatex}
+\addbibresource{references.bib}
 
 % Document setup
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1em}
 
-\title{Reducing development and testing time with System-on-Modules}
-\author{Trym Sneltvedt}
-
 \begin{document}
-\maketitle
 
+% Title page
+\begin{titlepage}
+    
+    \includegraphics[width=0.4\textwidth]{media/ntnu_hovedlogo_eng_svart.png}
+    
+    \vspace{1cm}
+    \huge
+    
+    \textbf{Project Thesis TFE4580}
+ 
+    \vspace{0.5cm}
+    
+    Automotive embedded system\\ 
+    implementation using System-on-Module
+ 
+    \vspace{1.5cm}
+    \Large
+    
+    \textbf{Trym Sneltvedt}
+
+    \vfill
+
+    December 2019
+    
+    \vspace{0.5cm}
+
+    Supervised by Bjørn B. Larsen
+\end{titlepage}
+
+
+\fcolorbox{red}{white}{
+    \begin{minipage}{\textwidth}
+    \color{red}
+    \Large
+    Unfinished version!
+    
+    Notes and comments are colored red.
+    \end{minipage}
+}
+\newpage
+
+
+\tableofcontents
+
+\newpage
+
+% Thesis content
 
 \input{1_introduction.tex}
 
@@ -25,6 +79,12 @@
 
 \input{4_results.tex}
 
+\input{5_discussion.tex}
+
+\printbibliography
+
+\newpage
+\input{6_appendix.tex}
 
 % Note: jeg må bruke flere ord
 % Være litt mer utfyllende

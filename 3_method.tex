@@ -1,37 +1,86 @@
 \section{Method}
 
+This section covers the choices made during the design of VCU20. Each subsection takes on a different challenge encountered in the 2019 season.
+
 \subsection{System-on-Module}
 
-As the the Zynq-7000 platform provides a sufficient platform for running the VCU control loop and the TV algorithm, but at the cost of high design complexity. By utilizing a Zynq-7000 based System-on-Module (SoM), we avoid the hard parts of PCB layout, and simply design the VCU as a \emph{breakout board} for the SoM. Using a SoM also gives us access to peripherals that would have been difficult to implement by ourselves, specifically Ethernet, external flash memory and external double data-rate (DDR) memory.
+The Zynq-7000 platform provided a sufficient platform for running the VCU control loop and the TV algorithm. However, the Zynq-7000 SoC product line are only available in BGA packages. This introduced unwanted complexity to the design, both in term of requirements to the PCB manufacturing, and to the assembly of the PCB, which is a process that normally is performed by team members at the electronic workshop at Revolve NTNU's headquarters. 
+
+In regards to the PCB production process, the BGA package of the SoC adds two kinds of complexity to the design. The first is the need for very tight tolerances. To be able to properly extract all necessary signals from the SoC, a trace width of $0.1\si{\milli\metre}$ is needed. Secondly, a higher number of PCB layers are needed. This is mainly because the SoC requires multiple different supply voltages, $1\si{\volt}$, $1.8\si{\volt}$ and $3.3\si{\volt}$ in the case of Zynq-7010. Both these requirements increase the price of PCB production drastically. Although PCB production houses have increased in number over the last few years, thereby driving the manufacturing cost down, special production techniques like more than 4 layer PCB's and $0.1\si{\milli\metre}$ trace widths still introduces high costs to production runs. A quick comparison on pcbway.com shows that 5 PCBs with 4 layers and a tolerance of $8\textrm{mils}\approx0.20\si{\milli\metre}$ and 4 layers costs 49USD to produce, while the same amount PCBs with tolerances of $4\textrm{mils}\approx0.10\si{\milli\metre}$ and 8 layers costs 388 USD. Additionally, the lead time increases from 4-5 days to 7-8 days. While these numbers might be acceptable for a large production run by a large company, it is most definitely an issue for a voluntary student organization like Revolve NTNU. 
+
+The solution to this issue is to employ as System-on-Module. Instead of mounting the SoC directly on the VCU20 PCB, we can purchase off-the-shelf SoC modules. These modules consists of a small PCB featuring a SoC and some peripherals like external DDR RAM and non-volatile flash memory. The modules interconnects with the VCU PCB by one or more PCB connectors which are easier to route. The downsides to using these modules is mainly the cost. The module utilized for VCU20, Enclustra Mercury ZX5 with Zynq-7015 (figure \ref{fig:zx5}), has a unit price of 318USD. However, as they are modular, they can easily be reused between seasons. Reusing soldered ICs is not common practice at Revolve NTNU, so this should mitigate the high entry cost at least to some extent.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.75\textwidth]{media/zx5.jpg}
+    \caption{Enclustra Mercury ZX5 SoM}
+    \label{fig:zx5}
+\end{figure}
+
+but at the cost of high design complexity. By utilizing a Zynq-7000 based System-on-Module (SoM), we avoid the hard parts of PCB layout, and simply design the VCU as a \emph{breakout board} for the SoM. Using a SoM also gives us access to peripherals that would have been difficult to implement by ourselves, specifically Ethernet, external flash memory and external double data-rate (DDR) memory.
+
+\subsection{Partitioning interfaces}
 
 
-\subsection{Ethernet for telemetry}
+As the VCU is an integral part of the EV, issues regarding the vehicle are also issues for the VCU. This section is dedicated to some of the issues encountered during last season, which hopefully can be solved by improving the design of the VCU.
 
-It is necessary to retrieve data on the vehicle and the different systems on it during races. This is both for later analysis and to indicate to the team if there might be issues with the vehicle before things go wrong. To achieve this, Nova utilized a military grade wireless communication solution by RadioNor, the CRE2-144-LW \cite{radionor}. UDP is used to interface with the radio and the physical layer is Ethernet. As no other system on Nova was equipped with Ethernet, the solution was to place a Raspberry Pi 3 B+ in the vehicle, and connect it to the CAN-FD buses with two PCAN-FD USB dongles. The Raspberry Pi would simply gather all available data from the CAN-FD buses and transmit it to the radio over Ethernet. 
 
-As the SoM chosen for VCU20 is equipped with an Ethernet-PHY interface, it is an opportunity to greatly simplify the telemetry system. By connecting the VCU directly to the radio directly using Ethernet, the total weight and complexity of the vehicle can be reduced. The downside to this is that the complexity is moved to the VCU, as it now has to communicate with the radio in addition to everything else.
+In Nova, the main communication channel for the embedded systems were two CAN-FD buses running at a base frequency of 1MHz and an data transfer frequency of 4MHz. A system overview can be seen in figure \ref{fig:vcu19_system}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=.85\textwidth]{media/vcu19_system.png}
+    \caption{VCU19 interface overview. Systems developed by other team members have dotted borders.}
+    \label{fig:vcu19_system}
+\end{figure}
+
+There are several points where this system can be improved. They will be discussed in detail in the following subsections.
 
 
 \subsection{Partitioning CAN-FD buses}
 
-As we want to reduce the load on the CAN-FD buses, we should look closer into ways to partitioning the communication channels in a different way, even add communication channels where that might be applicable. 
+A trace of the load on both CAN-FD buses during normal operation can be seen in figure \ref{fig:canfd_load}. Note the increase in load on bus 1 halfway into the trace. This is caused by the car entering "Drive-enable mode" where the VCU starts transmitting set points to the inverters.
 
-The inverter is heavily dependent on the VCU, but not many other systems. Having a dedicated communication channel between these two systems could potentially reduce the load on the CAN bus by a lot.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=.85\textwidth]{media/canfd-load.png}
+    \caption{CAN-FD bus load during typical operation}
+    \label{fig:canfd_load}
+\end{figure}
+
+From the calculations in section \ref{sec:max_util}, we know that to ensure that no frames are dropped (i.e. all deadlines are met) the bus utilization should be no more than 69\%. For bus 1, this seems to be in order. The trace tells us that the peak utilization is 71.3\%, but this is an outlier and probably not an issue. However, bus 0 seems to have a somewhat high bus load continuously, staying around 70\% load with peaks as high as 79.1\%. This is an area that can be improved.
+
+To start of, we will take a closer look at the frames that are transmitted on each bus. Last season, the team started the process of transitioning from an in-house protocol on top of CAN/CAN-FD (called the Revolve Protocol), to a standardized alternative, UAVCAN. One of the benefits of using UAVCAN is a simplified message definition process. Messages are defined in document schema definition language (DSDL) files and can be converted to C for use in embedded systems and high level data formats like JSON for use in analytics software. As a part of this transition, a simple Python script for calculating the load on each bus based on message size and period was written by Åsmund Eek, a team member from last year that was responsible for the CAN/CAN-FD systems. This code was slightly modified to fit the purposes of this report. 
+
+{\color{red}Calculations on bus load for different systems and different CAN-FD partitioning}
+
+Summing up, a system overview of VCU20 can be seen in figure \ref{fig:vcu20_system}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=.65\textwidth]{media/vcu20_system.png}
+    \caption{VCU20 interface overview}
+    \label{fig:vcu20_system}
+\end{figure}
 
 
-\subsection{Hardware design process}
+%As we want to reduce the load on the CAN-FD buses, we should look closer into ways to partitioning the communication channels in a different way, even add communication channels where that might be applicable. 
 
-As mentioned in the introduction, the team has to design and test hardware within a very short time.
+%The inverter is heavily dependent on the VCU, but not many other systems. Having a dedicated communication channel between these two systems could potentially reduce the load on the CAN bus by a lot.
 
-By reusing software and hardware design from last year's design, issues were reduced to a minimum.
 
-The electronic design automation \emph{(EDA)} software used for schematics and pcb layout, \emph{Altium Nexus} supports multiple features which shortened the design process significantly. Firstly, since VCU19 used \emph{hierarchical design} (i.e. project is composed of multiple sheets and sub sheets), large parts of the schematics developed during last years design period could be reused. 
+%A major issue with the embedded systems on last years EV is the load on the CAN-FD buses. The vehicle is equipped with 2 buses which are shared between all embedded systems on the car. From the bus load analysis in Figure \ref{fig:canfd_load}, it appears that the first bus has a peak of 80\% load, and the second bus peaks at 70\% when under load. The sudden jump in load on the second bus happens when the vehicle enters \emph{drive enable mode}, i.e. when the VCU starts transmitting data to the inverters that drive the motors. This suggests that data going to and from the VCU accounts for much of the total load on the buses. This can be verified by examining the CAN message overview, see figure ... 
 
-Simple sub circuits like CAN-FD transceivers could be directly copied without issue. In addition, the sub sheets are modular in the sense that they appear as an electrical component with a specific set of interfaces, or \emph{ports}. This means that sheet using the same set of ports can be interchanged freely. The modularity of the sheets was heavily used during the development of VCU20. The new processing unit features a super set of the VCU19 SoC interface, meaning they are perfectly compatible. 
+%From the aforementioned numbers we can see that much of the data 
 
-There is also the possibility of reusing sheets in the same project. VCU20 has 4 CAN-FD transceivers, but since the transceiver schematic is identical for all 4 interfaces, the sheet can simply be repeated. 
 
-There are also features for reuse in the PCB layout part of the design. Altium Nexus has a feature called \emph{rooms} which is a grouping of component footprints and how they are connected. It is possible to copy the layout if a room to other rooms. The designer chooses how rooms are generated, and by default they are created per sheet. This means that the layout for one CAN-FD transceiver can be perfected and then copied over to the other 3 transceiver rooms.
+\subsection{Ethernet for telemetry}
+
+It is necessary to retrieve data on the vehicle and the different systems on it during races. This is both for later analysis and to indicate to the team if there might be issues with the vehicle before things go wrong. To achieve this, Nova utilized a wireless communication solution from Radionor, the CRE2-144-LW \cite{radionor}. UDP is used to interface with the radio and the physical layer is Ethernet. As no other system on Nova was equipped with Ethernet, the solution was to place a Raspberry Pi 3 B+ in the vehicle, and connect it to the CAN-FD buses with two PCAN-FD USB dongles. The Raspberry Pi would simply gather all available data from the CAN-FD buses and transmit it to the radio over Ethernet. 
+
+As the SoM chosen for VCU20 is equipped with an Ethernet-PHY interface, it is an opportunity to greatly simplify the telemetry system. By connecting the VCU directly to the radio directly using Ethernet, the total weight and complexity of the vehicle can be reduced. The downside to this is that the complexity is moved to the VCU, as it now has to communicate with the radio in addition to everything else. 
+
+It is important that the telemetry system is able to perform at least as well as in Nova. As the previous telemetry system gathered data from both CAN-FD buses and sent the information over Ethernet to the radio, we must consider the bandwidth of both CAN-FD and Ethernet. The buses on Nova ran with a maximum data rate of $4\si{\mega\hertz}$, although it does not use this data rate all the time, we can simplify and say it has a bandwidth of $4\textrm{Mbps}$. This means a total bandwidth of both CAN-FD buses of $8\textrm{Mbps}$. The Raspberry Pi 3 B+ has a maximum Ethernet bandwidth of $300\textrm{Mbps}$ \cite{rpi}. This means the Ethernet interface on VCU20 has to achieve a minimum bandwidth of $8\textrm{Mbps}$. According to the specifications, the Mercury ZX5 module is capable of Gigabit Ethernet ($1 \textrm{Gbps}$) \cite{zx5}. However, the actual speed of the interface is heavily dependent on the quality of the PCB layout. Gigabit Ethernet consists of four differential pairs, each of which should be matched in length to each other and within the pair to achieve maximum bandwidth.
 
 
 % Looking at the messages which are being transmitted be the telemetry system, it is evident that much of the data originates from the VCU. However, most of this data does not need to be read by any other embedded system on the vehicle. A great improvement from last seasons design would therefore be to add an Ethernet interface to the VCU. This should reduce the load on the bus by a lot.

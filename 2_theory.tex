@@ -7,7 +7,7 @@ Ball grid array (\emph{BGA}) refers to a packaging type used for surface mount I
 \begin{figure}[H]
     \centering
     \includegraphics[width=.75\textwidth]{media/CLG225.JPG}
-    \caption{CLG255, a 15-by-15 pin BGA package used by the Zynq-7000 series SoC's \cite{clg225}}
+    \caption{CLG255, a 15-by-15 pin BGA package used by the Zynq-7000 series SoC's \cite{clg225} {\color{red}Do I need special permission to use an image from Xilinx?}}
     \label{fig:clg255}
 \end{figure}
 
@@ -22,7 +22,7 @@ CAN and CAN-FD is a one-to-many bus system where each frame is given an identifi
 
 \subsubsection{CAN-FD bus utilization}
 
-Almost all messages sent over the CAN-FD bus are sent at a regular interval. The size of the different messages are also known, this means that we know how long each message will occupy the bus for. These facts means that the frames on the bus can be modelled in the same way as tasks in a rate-monotonic scheduled system, known from real-time theory. This means the standard formula for utilization can be used when analyzing CAN and CAN-FD buses. The equation for utilization $U$ on a bus is given in equation \ref{eq:utilization}. 
+Almost all messages sent over the CAN-FD bus are sent at a regular interval. The size of the different messages are also known, this means that we know how long each message will occupy the bus for. These facts means that the frames on the bus can be modelled in the same way as tasks in a rate-monotonic scheduled (RMS) system, known from real-time theory. This means the standard formula for utilization can be used when analyzing CAN and CAN-FD buses. The equation for utilization $U$ on a bus is given in equation \ref{eq:utilization}. 
 
 \begin{equation}
     U=\sum_{i=1}^N\frac{C_i}{T_i}
@@ -32,7 +32,7 @@ Almost all messages sent over the CAN-FD bus are sent at a regular interval. The
 $C_i$ is the execution time and $T_i$ is the execution period for task $i$. In our case this is translated to the time frame $i$ is active on the bus and the period at which it should be transmitted. 
 
 
-\subsubsection{Maximum utilization}
+\subsubsection{Maximum utilization} \label{sec:max_util}
 
 We can use the \emph{Utilization-based schedulability test} to determine whether all deadlines are met for a set of tasks. The criteria can be seen in equation \ref{eq:utilization_criteria}. It is important to note that this test is sufficient but not necessary. This means that a passing test guarantees all deadlines are met but a failing test does not guarantee missed  deadlines.
 
@@ -52,61 +52,64 @@ From equation \ref{eq:utilization_criteria_calc} we can deem that as long as the
 
 However, the limit serves as a good target for max bus load, and we will work towards lowering bus load to below this limit.
 
+%The high load on the CAN-FD buses poses one of the big challenges with the current system. We want a mathematical model of the load on the CAN-FD buses which can tell us whether messages will be lost or not.
 
 
+%\subsubsection{Rate-Monotonic Scheduling}
 
-The high load on the CAN-FD buses poses one of the big challenges with the current system. We want a mathematical model of the load on the CAN-FD buses which can tell us whether messages will be lost or not.
+%As the messages sent over the CAN-FD buses are sent at a somewhat regular interval, the buses can be modeled as a rate-monotonic scheduled (RMS) system. This is a way to model the scheduling of software tasks when the tasks are run at a set interval and with a fixed execution time. We begin by looking at the equation for utilization used with RMS.
 
-\subsubsection{Rate-Monotonic Scheduling}
-
-As the messages sent over the CAN-FD buses are sent at a somewhat regular interval, the buses can be modeled as a rate-monotonic scheduled (RMS) system. This is a way to model the scheduling of software tasks when the tasks are run at a set interval and with a fixed execution time. We begin by looking at the equation for utilization used with RMS.
-
-
-
-Equation \ref{eq:utilization} shows how utilization is calculated for tasks, i.e. how much of the time that a task executes on a single core processor. 
+%Equation \ref{eq:utilization} shows how utilization is calculated for tasks, i.e. how much of the time that a task executes on a single core processor. 
 
 \subsubsection{CAN-FD utilization}
 
 From the RMS utilization equation we know that we need the execution time $C$ and period $T$ for each task. While the period for each CAN-FD message is easy to determine, the execution time takes slighly more effort.From now on we will call the execution time for a message $m$ the \emph{transmission time} and we will denote it $C_m$. For a standard CAN message it would be sufficient to divide the number of bits in the message by the operating frequency of the bus. This is made slightly more difficult as CAN-FD operates on two different frequencies, one for header transmission and one for data transmission. We can split look at the total transmission time as a sum of the transmission time for each of the frequencies , see equation \ref{eq:canfd_cm}.  
 
 \begin{equation}
-    C_m=T_s+T_f
+    C_m=C_s+C_f
     \label{eq:canfd_cm}
 \end{equation}
 
-$T_s$, the transmission time for the message header is a constant number of bits, how it is calculated can be seen in equation \ref{eq:canfd_ts}.
+$C_s$ is the transmission time for the message header. It is independent of frame size and  the calculation can be seen in equation \ref{eq:canfd_ts}.
 
 \begin{equation}
     \begin{gathered}
-        T_s=\frac{(SOF+ID+r1+IDE+EDL+r0+\frac{BRS}{2}+\frac{CRCdel}{2})\cdot1.2}{t_x}\\+\frac{ACK+DEL+EOF+IFS}{t_x}
+        C_s=\frac{(SOF+ID+r1+IDE+EDL+r0+\frac{BRS}{2}+\frac{CRCdel}{2})\cdot1.2}{t_x}\\+\frac{ACK+DEL+EOF+IFS}{t_x}
     \end{gathered}
     \label{eq:canfd_ts}
 \end{equation}
 
-The different equations can be seen in equation \ref{eq:canfd_tf}.
+$C_f$ if the transmission time for the frame data, sent at a higher speed than the header. It is calculated as in equation \ref{eq:canfd_tf} where $D_f$ is the data size in bits.
 
 \begin{equation}
-    T_f=\frac{(D_f+\frac{BRS}{2}+ESI+DLC+\frac{CRCdel}{2})\cdot1.2+CRC+BS}{t_y}
+    C_f=\frac{(D_f+\frac{BRS}{2}+ESI+DLC+\frac{CRCdel}{2})\cdot1.2+CRC+BS}{t_y}
     \label{eq:canfd_tf}
 \end{equation}
 
-Because of error detection mechanisms defined in the CAN-FD protocol, the transmission time for payloads larger than 16 bytes is different from payloads smaller than 16 bytes. For payloads smaller than 16 bytes the Cyclic Redundancy Check ($CRC$) is 17 bits and the Bit Stuffing ($BS$) is 5 bits. For payloads larger than 16 bits, $CRC$ rises to 21 bits and $BS$ to 6 bits.
+Because of error detection mechanisms defined in the CAN-FD protocol, the transmission time for payloads larger than 16 bytes is different from payloads smaller than 16 bytes. For payloads smaller than 16 bytes the $CRC$ (Cyclic Redundancy Check) is 17 bits and $BS$ (Bit Stuffing) is 5 bits. For payloads larger than 16 bits, $CRC$ rises to 21 bits and $BS$ to 6 bits.
 
 
-\begin{equation}
-    U=\sum_m\frac{C_m}{T_m}
-    \label{eq:canfd_busload}
-\end{equation}
+%\begin{equation} U=\sum_m\frac{C_m}{T_m} \label{eq:canfd_busload} \end{equation}
 
-We will also 
+% We will also 
 
-To make reflected decisions about the CAN-FD buses on the vehicle, we need mathematical tools to look at the worst case bus load. Equation \ref{eq:canfd_busload} shows the equation we will use to determine the utilization, or load, $U$ on the CAN-FD bus. $C_m$ is the worst case transmission time (WCTT) for a message $m$ while $T_m$ is the period of message $m$, i.e. how often it is transmitted. It is of course necessary to compute the load from each of the different messages on the bus to be able to calculate the load.
+% To make reflected decisions about the CAN-FD buses on the vehicle, we need mathematical tools to look at the worst case bus load. Equation \ref{eq:canfd_busload} shows the equation we will use to determine the utilization, or load, $U$ on the CAN-FD bus. $C_m$ is the worst case transmission time (WCTT) for a message $m$ while $T_m$ is the period of message $m$, i.e. how often it is transmitted. It is of course necessary to compute the load from each of the different messages on the bus to be able to calculate the load.
 
 
 
-WCTT is pretty straight forward to calculate, but it needs some explanation. What separates CAN-FD from CAN is flexible data-rate (FD). This means that the header or metadata of each frame is transmitted at a lower frequency, just like for CAN, but the payload of the frame is transmitted at a higher frequency, here called $t_y$, while the slower transmission rate is called $t_x$. The total WCTT for a message can be seen as a sum of the worst case time for the header transmission and the higher speed payload transmission, see equation \ref{eq:canfd_cm}.
+% WCTT is pretty straight forward to calculate, but it needs some explanation. What separates CAN-FD from CAN is flexible data-rate (FD). This means that the header or metadata of each frame is transmitted at a lower frequency, just like for CAN, but the payload of the frame is transmitted at a higher frequency, here called $t_y$, while the slower transmission rate is called $t_x$. The total WCTT for a message can be seen as a sum of the worst case time for the header transmission and the higher speed payload transmission, see equation \ref{eq:canfd_cm}.
+
+{\color{red}More information about calculating the worst case transmission time (WCTT) is needed}
 
 
 \subsection{Differential signalling}
 
-When dealing with high-speed, low-power signals in electronic systems, minimizing noise is of the utmost importance. One technique for dealing with this is \emph{differential signalling}. Simply put, it means driving two conductors instead of just one. Single-ended signalling, the conventional method, means that signalling lines are referenced to a common ground. In differential signalling, two lines are used for each signal line. These lines are referenced to each other instead of to a ground shared by all signals. This serves to remove noise that might be present on the ground plane and, when the two conductors are placed close to each other, excellent protection against external interference. When the lines are close to each other, electromagneting fields that normally would introduce noise to the signal will optimally affect both conductors by the same amount, and since we only look at the difference between the two lines, the noise is elegantly subtracted away.
+When dealing with high-speed, low-power signals in electronic systems, minimizing noise is of the utmost importance. One technique for dealing with this is \emph{differential signalling}. Simply put, it means driving two conductors instead of just one. Single-ended signalling, the conventional method, means that signalling lines are referenced to a common ground. In differential signalling, two lines are used for each signal line. These lines are referenced to each other instead of to a ground shared by all signals. This serves to remove noise that might be present on the ground plane and, when the two conductors are placed close to each other, excellent protection against external interference. When the lines are close to each other, electromagnetic fields that normally would introduce noise to the signal will optimally affect both conductors by the same amount, and since we only look at the difference between the two lines, the noise is elegantly subtracted away.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.75\textwidth]{media/diffsig.png}
+    \caption{Differential signalling illustrated. The signal is the difference between the signals on line $a$ and $b$.}
+    \label{fig:diffsig}
+\end{figure}
+

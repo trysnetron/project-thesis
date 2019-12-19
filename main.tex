@@ -3,6 +3,7 @@
 % Packages
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{csquotes}
 \usepackage[a4paper, margin=3cm]{geometry}
 \usepackage{lingmacros}
 \usepackage{tree-dvips}
@@ -13,9 +14,53 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{siunitx}
+\usepackage{booktabs}
 
-\usepackage[backend=biber,style=numeric,sorting=ynt]{biblatex}
+\usepackage{caption}
+\captionsetup{
+    width=.9\textwidth,
+    %justification=centering
+}
+
+\usepackage[acronym]{glossaries}
+\makeglossaries
+\input{acronyms.tex} 
+
+\usepackage[backend=biber,style=numeric,sorting=ynt,block=ragged]{biblatex}
 \addbibresource{references.bib}
+
+\usepackage{listings}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+ 
+\lstdefinestyle{mystyle}{
+    %backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single
+}
+ 
+\lstset{style=mystyle}
+
+\usepackage{hyperref}
+\hypersetup{breaklinks=true}
+
+
 
 % Document setup
 \setlength{\parindent}{0em}
@@ -42,6 +87,19 @@
     \Large
     
     \textbf{Trym Sneltvedt}
+    
+    % Unifished version note
+    \vspace{1.5cm}
+    \fcolorbox{red}{white}{
+        \begin{minipage}{\textwidth}
+        \color{red}
+        \Large
+        Release candidate.
+        
+        Notes and comments are colored red.
+        \end{minipage}
+    }
+    
 
     \vfill
 
@@ -52,21 +110,10 @@
     Supervised by Bjørn B. Larsen
 \end{titlepage}
 
-
-\fcolorbox{red}{white}{
-    \begin{minipage}{\textwidth}
-    \color{red}
-    \Large
-    Unfinished version!
-    
-    Notes and comments are colored red.
-    \end{minipage}
-}
+\printglossary[type=\acronymtype]
 \newpage
 
-
 \tableofcontents
-
 \newpage
 
 % Thesis content
@@ -81,12 +128,12 @@
 
 \input{5_discussion.tex}
 
+\input{6_conclusion.tex}
+
 \printbibliography
 
-{\color{red}Need more references}
-
 \newpage
-\input{6_appendix.tex}
+\input{appendix.tex}
 
 % Note: jeg må bruke flere ord
 % Være litt mer utfyllende

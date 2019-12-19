@@ -16,18 +16,22 @@ There are also features for reuse in the PCB layout part of the design. Altium N
 
 The PCB was produced by Simpro AS as they are sponsoring Revolve NTNU. The finished, soldered PCB can be seen in figure \ref{fig:vcu20_soldered}.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=.85\textwidth]{media/vcu20.JPG}
-    \caption{VCU20 PCB with all components and Mercury ZX5 module attached}
+    \caption{VCU20 PCB with all components and Mercury ZX5 module attached.}
     \label{fig:vcu20_soldered}
 \end{figure}
 
-{\color{red}Must mention CAN-FD interfaces (whether they work or not)}
+\subsection{CAN-FD buses}
 
-\subsection{Ethernet bandwidth}
+Because of time shortage, a proper \acrfull{hil} test to determine the new load on the \acrshort{canfd} buses was not performed. It would have required porting the software for \acrshort{vcu19} to \acrshort{vcu20} and implement functionality for Ethernet. Because of the time frames set by the embedded electronics group in Revolve NTNU, the \acrshort{pcb}s arrived in late November. In addition, the embedded electronics workshop had to be moved last minute, which also delayed the schedule.  
 
-{\color{red} Benchmark Ethernet interface bandwidth. Calculations showing whether it is able to transmit all data from CAN-FD buses over telemetry}
+However, the \acrshort{canfd} buses were tested and proved working. Although the bandwidth has yet to be tested, there is little to indicate any worse performance than that on \acrshort{vcu19}.
+
+\subsection{Ethernet}
+
+Ethernet functionality was tested and verified. A simple web server part of Enclustra's example project for the ZX5 provided the source code and instructions \cite{zx5_ex}, it worked perfectly. Unfortunately, there were no time to benchmark the bandwith of the Ethernet interface and thereby determine the degree of success in regards to the differential pair layout. 
 
 \subsection{Further work}
 

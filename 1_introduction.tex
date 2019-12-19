@@ -4,62 +4,62 @@
 
 \subsubsection{Revolve NTNU}
 
-Revolve NTNU is a student organization dedicated to constructing electric formula cars for the international Formula Student competitions. In the course of one year, an electric vehicle (EV) is designed, constructed and tested before entering multiple competitions, facing off against comparable vehicles and teams from other universities from around the world.
+Revolve NTNU is a student organization dedicated to constructing electric formula cars for the international \acrfull{fs} competitions. In the course of one year, an electric vehicle (\acrshort{ev}) is designed, constructed and tested before entering multiple competitions, facing off against comparable vehicles and teams from other universities from around the world.
+
+The combination of short development time and a team consisting of mostly new, inexperienced members makes for several interesting problems. This report will focus on a specific embedded system, the \acrfull{vcu}, and the issues encountered when developing it. As the \acrshort{ev} is almost exclusively made from custom parts, the different systems on the car depends heavily on each other. This means that changes done to the \acrshort{vcu} will invariably affect the rest of the vehicle and vice-versa. 
+
+
+\subsubsection{The vehicle control unit}
+
+The vehicle control unit is the central control system of the electric vehicle. It is responsible for handling sensory data from the vehicle and the driver, and then output fitting data to the motor controllers (\emph{inverters}) for each electric motor.
+
+In addition, the \acrshort{vcu} is to
+\begin{itemize}
+    \item put the vehicle into Drive-Enable mode when certain criteria are met.
+    \item perform safety checks on inputted data and take appropriate action if errors are found.
+    \item interface with the \acrfull{ins}.
+    \item interface with the data logger provided by competition officials, as per EV 4.6 \cite{fsgrules}.
+\end{itemize}
+
+The team member responsible for the \acrshort{vcu} is not responsible for the implementation of the control algorithms that takes vehicle and driver input and outputs motor set points. The control algorithms performs \acrfull{tv}, a technique for intelligently varying the torque on each wheel. This increases the maneuverability of the \acrshort{ev}, especially in corners. The \acrshort{vcu} is responsible for providing an environment for the control algorithms to run.
+
+% Since the vehicle is capable of speeds exceeding 110 kilometres per hour \cite{novaspeed}, the control algorithms cannot use more time than necessary. As the deadlines the \acrshort{vcu} has to uphold are critical for the survival of the vehicle and possibly the driver, it is per definition a \emph{hard real-time embedded system}. However, the exact deadline is unknown. The rule of thumb used by members is that the control loop has to run in at no lower than 100 \si{\hertz}. {\color{red}(Should really find some data on this.)}
+
+
+\subsubsection{Analysis of 2019 system}\label{sec:2019sys}
+
+In the 2019 season, Revolve NTNU their newest \acrshort{ev}, Nova (see figure \ref{fig:nova}).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{media/Nova.png}
-    \caption{Revolve NTNU 2019's electric vehicle, Nova}
+    \caption{Revolve NTNU 2019's electric vehicle, Nova.}
     \label{fig:nova}
 \end{figure}
 
-The combination of short development time and a team consisting of mostly new, inexperienced members makes for several interresting problems. This report will focus on a specific embedded system, the vehicle control unit (VCU), and the issues encountered when developing it. As the EV is almost exclusively made from custom parts, the different systems on the car depends heavily on each other. This means that both changes done the VCU will invariably affect the rest of the vehicle and issues with other systems will most certainly affect the VCU. 
+To fulfill the requirements of the \acrshort{tv} control algortihm, \acrfull{vcu19} was designed around a new processing platform, the Xilinx Zynq-7000 \cite{zynq}. It is a \acrfull{soc} with a dual core ARM Cortex A9 processor and embedded \acrfull{fpga}. 
 
-To get a clearer picture of necessary changes to the VCU, we start with the system requirements. analyze last year's VCU, VCU19.
+There were however issues with this implementation. Advanced processing units like the Zynq-7000 are commonly only available in \acrfull{bga} packages, meaning packages with all pins placed in a grid pattern on the bottom. This makes assembly and debugging harder, a serious concern considering the rapid development methodologies necessary in Revolve NTNU. The high complexity of design also compelled the previous designer to use the smallest available package, a 225 pin \acrshort{bga} package. This limits the available peripherals and functionality of the \acrshort{vcu}, but was deemed a necessary compromise during the 2019 season. A 3D render of \acrshort{vcu19} can be seen in figure \ref{fig:vcu19}.
 
-\subsubsection{The vehicle control unit}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.95\textwidth]{media/vcu19.png}
+    \caption{\acrshort{vcu} from 2019 season, designed by Nikolai Nymo.}
+    \label{fig:vcu19}
+\end{figure}
 
-The vehicle control unit is the central control system of the electric vehicle. That is, it is responsible for inputting sensory data from the vehicle and the driver, and then output fitting data to electric motors connected to each wheel.
+Another issue encountered was the high load on the \acrfull{canfd} buses. Much of the work in Revolve NTNU is directed at analyzing data from the \acrshort{ev}. The data is transmitted from the vehicle to a base station nearby using a proprietary wireless communication system from Radionor AS \cite{radionor}. This is called the \emph{telemetry} system.
 
-In addition, the VCU is to
-\begin{itemize}
-    \item put the vehicle into Drive-Enable mode when certain criteria are met
-    \item perform safety checks on inputted data and take appropriate action if errors are found
-    \item interface with the inertial navigation system (INS)
-    \item interface with the data logger provided by competition officials, as per EV 4.6 \cite{fsgrules}
-\end{itemize}
+The radio must be used through an Ethernet interface and there are no other embedded systems on the \acrshort{ev} equipped with Ethernet. This was solved by connecting a Raspberry Pi \cite{rpi} to the two \acrshort{canfd} buses of the car using two PCAN-FD USB dongles \cite{pcan}. The Raspberry Pi is equipped with an Ethernet jack, allowing it to gather data from the \acrshort{canfd} buses and transmit it to the radio.
 
-The team member responsible for the VCU is not responsible for the implementation of the control algorithms that takes vehicle and driver input and outputs motor set points. The control algorithms performs torque vectoring, a technique for intelligently varying the torque on each wheel {\color{red}(reference here)}, increasing the maneuverability of the EV. The VCU is responsible for providing an environment for the control algorithms to run.
+This solution introduces two issues. Firstly, this means that all the data that are to be sent over telemetry has to be present on the buses. As a result, the buses operate at nearly maximum capacity, introducing the risk of bus congestion (i.e. loss of messages).
 
-Since the vehicle is capable of speeds exceeding 110 kilometres per hour \cite{novaspeed}, the control algorithms cannot use more time than necessary. As the deadlines the VCU has to uphold are critical for the survival of the vehicle and possibly the driver, it is per definition a \emph{hard real-time embedded system}. However, the exact deadline is unknown. The rule of thmub used by members is that the control loop has to run in at no lower than 100 \si{\hertz}. {\color{red}(Should really find some data on this.)}
+The other issue is that the telemetry translation adds weight to the \acrshort{ev}. The accumulated weight of the Raspberry Pi and the two dongles amounts to almost 200\si{\gram}. Revolve NTNU works hard to reduce the weight of the vehicle as it increases the possible acceleration and allows for shorter lap times.
 
-\subsubsection{Analysis of VCU19}
-
-To fulfill the requirements of the control algortihm, VCU19 was designed around a new processing platform, the Xilinx Zynq-7000. It is a SoC with a dual core ARM Cortex A9 processor and embedded FPGA \cite{zynq}. There were however issues with this implementation. Advanced processing units like the Zynq-7000 are commonly only available in ball grid array (BGA) packages, meaning packages with all pins placed in a grid pattern on the bottom. This makes hand soldering impossible, a reflow method has to be used instead. This makes assembly and debugging harder, a serious concern considering the rapid development methodologies necessary in Revolve NTNU. The high complexity of design also compelled the previous designer to opt for the smallest available package, a 225 pin BGA package. This limits the available peripherals, but was deemed a necessary compromise during the 2019 season.
-
-
-
-
-
-%\tikzstyle{block}=[draw, thick, minimum size=5mm]
-
-%\begin{figure}[h!]
-%    \centering
-%    \begin{tikzpicture}[node distance=3cm,auto]
-%       %Nodes
-%        \node [block] (vcu) {VCU};
-%        \node [block] (ins) [right of=vcu] {INS};
-%       
-%       %Lines
-%        \path [<->] (vcu) edge node {RS-232} (ins);
-%    \end{tikzpicture}
-%    \caption{CAN-FD bus load}
-%    \label{fig:canfd}
-%\end{figure}
 
 \subsection{Scope}
 
-This report covers the design of VCU20. The main focus of the new design is to reduce the complexity of the system while keeping the performant Zynq-7000 SoC platform. 
+This report covers the design of \acrfull{vcu20}. The main focus of the new design is to reduce the hardware complexity of the system (while keeping the performant Zynq-7000 \acrshort{soc} platform) and reduce both total vehicle weight and \acrshort{canfd} bus load. 
 
 %In addition we will take a closer look at the CAN-FD buses connecting the embedded systems on the vehicle.
 

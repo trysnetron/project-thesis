@@ -1,40 +1,40 @@
 \section{Theory}
 
-\subsection{Ball grid array PCB layout}
+\subsection{Ball Grid Array PCB layout}
 
-Ball grid array (\emph{BGA}) refers to a packaging type used for surface mount IC's. BGA packages feature all interconnects on the bottom of the package and allows for a higher number of connected pins than with pins on the edges of the package, see figure \ref{fig:clg255}.
+\acrshort{bga} refers to a packaging type used for surface mount \acrshort{ic}s. \acrshort{bga} packages feature all interconnects on the bottom of the package and allows for a higher number of connected pins than with pins on the edges of the package, see figure \ref{fig:clg255}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=.75\textwidth]{media/CLG225.JPG}
-    \caption{CLG255, a 15-by-15 pin BGA package used by the Zynq-7000 series SoC's \cite{clg225} {\color{red}Do I need special permission to use an image from Xilinx?}}
+    \caption{CLG255, a 15-by-15 pin \acrshort{bga} package used by some \acrshort{soc}s in the Xilinx Zynq-7000 series. Illustration image taken from the XC7Z010-2CLG225I product page on www.digikey.com \cite{clg225}.}
     \label{fig:clg255}
 \end{figure}
 
-As the pins are hidden when the package is mounted on a PCB, BGA packages are must be soldered by other methods than classical hand-soldering. Reflow soldering is a popular method for soldering BGA's where the entire package and adhering PCB are heated to the point where all the solder melts. This is typically performed in a dedicated reflow soldering oven, but can also be performed using a hot-air gun or similar.
+As the pins are hidden when the package is mounted on a \acrshort{pcb}, \acrshort{bga} packages must be soldered by other methods than classical hand-soldering. Reflow soldering is a popular method for soldering \acrshort{bga}'s where the entire package and adhering \acrshort{pcb} are heated to the point where all the solder melts. This is typically performed in a dedicated reflow soldering oven, but can also be performed using a hot-air gun or similar.
 
 
 \subsection{CAN-FD}
 
-The different embedded systems on the vehicle communicate with each other using CAN-FD. CAN, or \emph{controller area network} is a network bus developed by Bosch. It has been the de-facto standard communication platform for automotive applications since the mid-1990's. An improved version, CAN-FD (flexible data-rate) was released by Bosh in 2012, it differs from CAN in that the body of each message (called \emph{frames} for CAN) are transmitted at a higher frequency than the header and the allowed frame size increases from 8 to 64 bytes. This is the communication bus currently used at Revolve NTNU.
+The different embedded systems on the vehicle communicate with each other using \acrshort{canfd}. \acrfull{can} is a network bus developed by Bosch. It has been the de-facto standard communication platform for automotive applications since the mid-1990's. An improved version, \acrfull{canfd} was released by Bosh in 2012, it differs from \acrshort{can} in that the body of each message (called \emph{frames} for \acrshort{can}) are transmitted at a higher frequency than the header and the allowed frame size increases from 8 to 64 bytes. This is the communication bus currently used at Revolve NTNU.
 
-CAN and CAN-FD is a one-to-many bus system where each frame is given an identifier which determines the priority of the frame. When the bus is free, all connected devices can begin transmitting their frame, but the frame with the highest priority will take precedence on the bus. When a frame is transmitted on the bus, any connected device are able to read it. When the frame has successfully been transmitted the bus is again free and a new transmission can begin.
+\acrshort{can} and \acrshort{canfd} is a one-to-many bus system where each frame is given an identifier which determines the priority of the frame. When the bus is free, all connected devices can begin transmitting their frame, but the frame with the highest priority will take precedence on the bus. When a frame is transmitted on the bus, any connected device are able to read it. When the frame has successfully been transmitted the bus is again free and a new transmission can begin.
 
 \subsubsection{CAN-FD bus utilization}
 
-Almost all messages sent over the CAN-FD bus are sent at a regular interval. The size of the different messages are also known, this means that we know how long each message will occupy the bus for. These facts means that the frames on the bus can be modelled in the same way as tasks in a rate-monotonic scheduled (RMS) system, known from real-time theory. This means the standard formula for utilization can be used when analyzing CAN and CAN-FD buses. The equation for utilization $U$ on a bus is given in equation \ref{eq:utilization}. 
+Almost all messages sent over the \acrshort{canfd} bus are sent at a regular interval. The size of the different messages are also known, this means that we know how long each message will occupy the bus for. These facts means that the frames on the bus can be modelled in the same way as tasks in a \acrfull{rms} system, known from real-time theory. This means the standard formula for utilization can be used when analyzing \acrshort{can} and \acrshort{canfd} buses. The equation for utilization $U$ on a bus is given in equation \ref{eq:utilization}. 
 
 \begin{equation}
     U=\sum_{i=1}^N\frac{C_i}{T_i}
     \label{eq:utilization}
 \end{equation}
 
-$C_i$ is the execution time and $T_i$ is the execution period for task $i$. In our case this is translated to the time frame $i$ is active on the bus and the period at which it should be transmitted. 
+$C_i$ is how long task $i$ takes to execute (execution time) and $T_i$ is how often the task is set to execute (execution period). In our case this is translated to the time frame $i$ is active on the bus and the period at which it should be transmitted. 
 
 
 \subsubsection{Maximum utilization} \label{sec:max_util}
 
-We can use the \emph{Utilization-based schedulability test} to determine whether all deadlines are met for a set of tasks. The criteria can be seen in equation \ref{eq:utilization_criteria}. It is important to note that this test is sufficient but not necessary. This means that a passing test guarantees all deadlines are met but a failing test does not guarantee missed  deadlines.
+We can use the \emph{Utilization-based schedulability test} \cite{ttk4147} to determine whether all deadlines are met for a set of tasks. The criteria can be seen in equation \ref{eq:utilization_criteria}. It is important to note that this test is sufficient but not necessary. This means that a passing test guarantees all deadlines are met but a failing test does not guarantee missed deadlines.
 
 \begin{equation}
     U=\sum_{i=1}^N\frac{C_i}{T_i}\leq N\left(2^\frac{1}{N}-1\right)
@@ -48,7 +48,7 @@ $N$ denotes the number of different tasks being scheduled. Since the number of d
     \label{eq:utilization_criteria_calc}
 \end{equation}
 
-From equation \ref{eq:utilization_criteria_calc} we can deem that as long as the bus load on each of the CAN-FD buses are below 69.3\%, no messages are lost. This does of course not mean that the vehicle becomes unusable, figure \ref{fig:canfd_load} shows that the load was above the the limit for both buses, and the vehicle worked fine. The embedded systems are naturally made to be resilient to frame loss.
+From equation \ref{eq:utilization_criteria_calc} we can deem that as long as the bus load on each of the \acrshort{canfd} buses are below 69.3\%, no messages are lost. This does of course not mean that the vehicle becomes unusable, figure \ref{fig:canfd_load} shows that the load was above the the limit for both buses, and the vehicle worked fine. The embedded systems are naturally made to be resilient to frame loss.
 
 However, the limit serves as a good target for max bus load, and we will work towards lowering bus load to below this limit.
 
@@ -63,14 +63,14 @@ However, the limit serves as a good target for max bus load, and we will work to
 
 \subsubsection{CAN-FD utilization}
 
-From the RMS utilization equation we know that we need the execution time $C$ and period $T$ for each task. While the period for each CAN-FD message is easy to determine, the execution time takes slighly more effort.From now on we will call the execution time for a message $m$ the \emph{transmission time} and we will denote it $C_m$. For a standard CAN message it would be sufficient to divide the number of bits in the message by the operating frequency of the bus. This is made slightly more difficult as CAN-FD operates on two different frequencies, one for header transmission and one for data transmission. We can split look at the total transmission time as a sum of the transmission time for each of the frequencies , see equation \ref{eq:canfd_cm}.  
+From the \acrshort{rms} utilization equation we know that we need the execution time $C$ and period $T$ for each task. While the period for each CAN-FD message is easy to determine, the execution time takes slighly more effort.From now on we will call the execution time for a message $m$ the \emph{transmission time} and we will denote it $C_m$. For a standard \acrshort{can} message it would be sufficient to divide the number of bits in the message by the operating frequency of the bus. This is made slightly more difficult as \acrshort{canfd} operates on two different frequencies, one for arbitration (header) transmission and one for data transmission. We can split look at the total transmission time as a sum of the transmission time for each of the frequencies, see equation \ref{eq:canfd_cm}.  
 
 \begin{equation}
     C_m=C_s+C_f
     \label{eq:canfd_cm}
 \end{equation}
 
-$C_s$ is the transmission time for the message header. It is independent of frame size and  the calculation can be seen in equation \ref{eq:canfd_ts}.
+$C_s$ is the transmission time for the message header. It is independent of frame size and the calculation can be seen in equation \ref{eq:canfd_ts}.
 
 \begin{equation}
     \begin{gathered}
@@ -86,7 +86,12 @@ $C_f$ if the transmission time for the frame data, sent at a higher speed than t
     \label{eq:canfd_tf}
 \end{equation}
 
-Because of error detection mechanisms defined in the CAN-FD protocol, the transmission time for payloads larger than 16 bytes is different from payloads smaller than 16 bytes. For payloads smaller than 16 bytes the $CRC$ (Cyclic Redundancy Check) is 17 bits and $BS$ (Bit Stuffing) is 5 bits. For payloads larger than 16 bits, $CRC$ rises to 21 bits and $BS$ to 6 bits.
+$SOF$, $ID$, $IDE$, $EDL$, $r0$, $r1$, $BRS$, $CRCdel$, $ACK$, $DEL$, $EOF$, $IFS$, $ESI$ and $DLC$ denotes bitfields of fixed size in the CAN messages, i.e. they are constant. $t_x$ denotes the period of the arbitration frequency and $t_y$ is the period for the data frequency. $1.2$ is a factor for ensuring worst case behaviour. $D_f$ is the actual data that is transmitted in the frame and is almost the only size that can change in equations (\ref{eq:canfd_ts}) and (\ref{eq:canfd_tf}).
+
+Because of error detection mechanisms defined in the \acrshort{canfd} protocol, the transmission time for payloads larger than 16 bytes is different from payloads smaller than 16 bytes. For payloads smaller than 16 bytes the \acrfull{crc} is 17 bits and \acrfull{bs} is 5 bits. For payloads larger than 16 bits, $\acrshort{crc}$ rises to 21 bits and $\acrshort{bs}$ to 6 bits.
+
+This is all that is needed to calculate the worst case load of a CAN-FD frame \cite{canfd}.
+
 
 
 %\begin{equation} U=\sum_m\frac{C_m}{T_m} \label{eq:canfd_busload} \end{equation}
@@ -98,8 +103,6 @@ Because of error detection mechanisms defined in the CAN-FD protocol, the transm
 
 
 % WCTT is pretty straight forward to calculate, but it needs some explanation. What separates CAN-FD from CAN is flexible data-rate (FD). This means that the header or metadata of each frame is transmitted at a lower frequency, just like for CAN, but the payload of the frame is transmitted at a higher frequency, here called $t_y$, while the slower transmission rate is called $t_x$. The total WCTT for a message can be seen as a sum of the worst case time for the header transmission and the higher speed payload transmission, see equation \ref{eq:canfd_cm}.
-
-{\color{red}More information about calculating the worst case transmission time (WCTT) is needed}
 
 
 \subsection{Differential signalling}

@@ -1,4 +1,18 @@
 \section{Discussion}
 
-{\color{red} Reflect on results.}
+\subsection{PCB design}
+
+The use of hierarchical design made the \acrshort{pcb} design process relatively simply. Layout of the Ethernet interface required use of differential signalling, this is the most complex piece of hardware design in this project. Because of tools made specifically for this kind of work in the \acrshort{pcb} layout software, this process is made easier even for inexperienced hardware designers.  
+
+\subsection{PCB production}
+
+It is worth noting that the prototype production run of \acrshort{vcu20}, a sponsor of Revolve NTNU covered all costs of \acrshort{pcb} production. This renders the argument of reducing cost by employing a \acrshort{som} somewhat moot. However, this has not been the case for previous teams, and it is far from certain that it will continue like this in the future.
+
+\subsection{PCB assembly}
+
+Soldering the finished \acrshort{pcb} was done solely by hand without any major problems. The connectors used for the ZX5 module has a \emph{pitch} (distance between the individual pins) of $0.5\si{\milli\metre}$, which is hard to solder by eye. A microscope was used for this part of the soldering, and since Revolve NTNU owns several microscopes this is not regarded as a large issue.   
+
+\subsection{PCB testing}
+
+When soldering was finished, \acrshort{vcu20} underwent a series of tests to ensure correct design and assembly. This is a necessary part of any engineering design process and it was able to uncover one rather large mistake in the design of \acrshort{vcu20} which rendered the \acrfull{jtag} interface necessary for flashing firmware onto the \acrshort{som}, unuseable. Luckily, it was possible to correct this error by unsoldering a buffer intended to protect the programming interface from noise when inside the \acrshort{ev} and soldering jumper wires to the pads.
 

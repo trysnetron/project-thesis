@@ -20,6 +20,32 @@ The different embedded systems on the vehicle communicate with each other using 
 
 \acrshort{can} and \acrshort{canfd} is a one-to-many bus system where each frame is given an identifier which determines the priority of the frame. When the bus is free, all connected devices can begin transmitting their frame, but the frame with the highest priority will take precedence on the bus. When a frame is transmitted on the bus, any connected device are able to read it. When the frame has successfully been transmitted the bus is again free and a new transmission can begin.
 
+An overview of the CAN-FD base frame format is seen in table \ref{tab:can_frame}.
+
+\begin{table}[H]
+    \centering
+    \caption{\acrshort{canfd} frame format.}
+    \begin{tabular}{lll}
+        \toprule
+        Field & Name & Size (bits) \\
+        \midrule
+        $SOF$ & Start-of-frame & 1 \\
+        $ID$ & Frame identifier & 11 \\
+        $RTR$ & Remote transmission request & 1 \\
+        $IDE$ & Identifier extension bit & 1 \\
+        $r0$ & Reserved bit 0 & 1 \\
+        $DLC$ & Data length code & 4 \\
+        $Df$ & Data field & 0-512 \\
+        $CRC$ & Cyclic redundancy check & 15 \\
+        $CRCdel$ & CRC delimiter & 1 \\
+        $ACK$ & Acknowledge & 1 \\
+        $ACKdel$ & ACK delimiter & 1 \\
+        $EOF$ & End-of-frame & 7 \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:can_frame}
+\end{table}
+
 \subsubsection{CAN-FD bus utilization}
 
 Almost all messages sent over the \acrshort{canfd} bus are sent at a regular interval. The size of the different messages are also known, this means that we know how long each message will occupy the bus for. These facts means that the frames on the bus can be modelled in the same way as tasks in a \acrfull{rms} system, known from real-time theory. This means the standard formula for utilization can be used when analyzing \acrshort{can} and \acrshort{canfd} buses. The equation for utilization $U$ on a bus is given in equation \ref{eq:utilization}. 

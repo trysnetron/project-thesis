@@ -30,11 +30,9 @@
 \addbibresource{references.bib}
 
 \usepackage{listings}
- 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
- 
 \lstdefinestyle{mystyle}{
     %backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen},
@@ -54,12 +52,12 @@
     tabsize=2,
     frame=single
 }
- 
 \lstset{style=mystyle}
 
 \usepackage{hyperref}
 \hypersetup{breaklinks=true}
 
+\usepackage[final]{pdfpages}
 
 
 % Document setup
@@ -87,19 +85,6 @@
     \Large
     
     \textbf{Trym Sneltvedt}
-    
-    % Unifished version note
-    \vspace{1.5cm}
-    \fcolorbox{red}{white}{
-        \begin{minipage}{\textwidth}
-        \color{red}
-        \Large
-        Release candidate.
-        
-        Notes and comments are colored red.
-        \end{minipage}
-    }
-    
 
     \vfill
 
@@ -130,17 +115,12 @@
 
 \input{6_conclusion.tex}
 
+% References
+
+\addcontentsline{toc}{section}{References}
 \printbibliography
 
 \newpage
 \input{appendix.tex}
-
-% Note: jeg må bruke flere ord
-% Være litt mer utfyllende
-
-% Benchmark noe som er lett å benchmarke
-% Husk å være litt kritisk til modulen
-
-% Tidsplan er smart
 
 \end{document}

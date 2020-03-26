@@ -14,5 +14,15 @@ Soldering the finished \acrshort{pcb} was done solely by hand without any major 
 
 \subsection{PCB testing}
 
-When soldering was finished, \acrshort{vcu20} underwent a series of tests to ensure correct design and assembly. This is a necessary part of any engineering design process and it was able to uncover one rather large mistake in the design of \acrshort{vcu20} which rendered the \acrfull{jtag} interface necessary for flashing firmware onto the \acrshort{som}, unuseable. Luckily, it was possible to correct this error by unsoldering a buffer intended to protect the programming interface from noise when inside the \acrshort{ev} and soldering jumper wires to the pads.
+After finishing assembly, \acrshort{vcu20} underwent a series of tests to ensure correct functioning. During testing, it was discovered that the \acrfull{jtag} interface was incorrectly connected to the ZX5 module. See figure 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.85\textwidth]{media/jtag_error.png}
+    \caption{JTAG interface schematic in Altium Nexus. Notice the signal mismatch as they enter the \emph{harness} (a collection of signals).}
+    \label{fig:vcu20_soldered}
+\end{figure}
+
+Luckily, this error was recoverable by unsoldering a programming buffer soldering jumper wires to its pads, correcting the error. After performing this fix, the \acrshort{jtag} worked correctly. 
+
 

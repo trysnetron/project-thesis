@@ -1,12 +1,22 @@
 \section*{Appendix}
 
-\subsection*{Layout}
-
-\subsection*{Schematics}
-
 \subsection*{Bus load calculation code}
 
 The  following Python script was written by team member Åsmund Eek during the 2019 season. It reads the \acrshort{dsdl} files from an (internal) centralized repository for keeping track of all message formats that are present on the \acrshort{canfd} buses. Note that the script differentiates between CAN frames using the UAVCAN data link layer protocol, and the deprecated \acrfull{rp}.
 
 \lstinputlisting[language=Python]{code/bus_load_calculations.py}
+
+\newpage
+\subsection*{PCB schematics and layout}
+
+The layout pages (last 4) are listed in the following order:
+
+\begin{enumerate}
+    \item Top signal plane (red)
+    \item Ground plane (dark green)
+    \item Power plane (light green)
+    \item Bottom signal plane (blue)
+\end{enumerate}
+
+\includepdf[pages=-,angle=90,pagecommand={},width=1.3\textwidth]{media/R20_EV_VCU.pdf}
 

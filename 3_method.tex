@@ -6,7 +6,7 @@ This section covers the choices made during the design of \acrshort{vcu20}. Each
 
 The Zynq-7000 platform provided a sufficient platform for running the \acrshort{tv} algorithm and control loop. However, the Zynq-7000 \acrshort{soc} product line are only available in \acrshort{bga} packages. This introduced unwanted complexity to the design, both in term of requirements to the \acrshort{pcb} manufacturing, and to the assembly of the circuit boards which is a process that normally is performed by team members at the electronic workshop at Revolve NTNU's headquarters. 
 
-In regards to the \acrshort{pcb} production process, the \acrshort{bga} package of the \acrshort{soc} adds two kinds of complexity to the design. The first is the need for very tight tolerances. To be able to properly extract all necessary signals from the \acrshort{soc}, a trace width of $0.1\si{\milli\metre}$ is needed. Secondly, the circuit board requires a higher number of layers. This is mainly because the \acrshort{soc} requires multiple different supply voltages, $1\si{\volt}$, $1.8\si{\volt}$ and $3.3\si{\volt}$ in the case of Z-7010, the specific \acrshort{soc} utilized in \acrshort{vcu19}. 
+In regards to the \acrshort{pcb} production process, the \acrshort{bga} package of the \acrshort{soc} adds two kinds of complexity to the design. The first is the need for very tight tolerances. To be able to properly extract all necessary signals from the \acrshort{soc}, a trace width of $0.1\si{\milli\metre}$ is needed. Secondly, the circuit board requires a higher number of layers. This is mainly because the \acrshort{soc} requires multiple different supply voltages. 
 
 Both these requirements increase the price of \acrshort{pcb} production drastically. Although \acrshort{pcb} production houses have increased in number over the last few years, thereby driving the manufacturing cost down, special production techniques like more than 4 layer \acrshort{pcb}s and $0.1\si{\milli\metre}$ trace widths still introduces high costs to production runs. Table \ref{tab:pcb_cost} shows a cost comparison of the different tolerances and layer numbers. 
 
@@ -42,17 +42,9 @@ The solution to this issue is to employ as System-on-Module. Instead of mounting
 As the VCU is an integral part of the EV, issues regarding the vehicle are also issues for the VCU. This section is dedicated to some of the issues encountered during last season, which hopefully can be solved by improving the design of the VCU.
 
 
-In Nova, the main communication channel for the embedded systems were two CAN-FD buses running at a base frequency of 1MHz and an data transfer frequency of 4MHz. A system overview can be seen in figure \ref{fig:vcu19_system}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=.85\textwidth]{media/vcu19_system.png}
-    \caption{VCU19 interface overview. Systems developed by other team members have dotted borders.}
-    \label{fig:vcu19_system}
-\end{figure}
+In Nova, the main communication channel for the embedded systems were two CAN-FD buses running at a base frequency of 1MHz and an data transfer frequency of 4MHz. A system overview is displayed in figure \ref{fig:vcu19_system}.
 
 There are several points where this system can be improved. They will be discussed in detail in the following subsections.
-
 
 \subsubsection{CAN-FD buses}
 
@@ -65,7 +57,7 @@ A trace of the load on both CAN-FD buses during normal operation can be seen in 
     \label{fig:canfd_load}
 \end{figure}
 
-From the traces we can see that bus 0 typically has a utilization of 60-70\% while bus 1 rests at about 30\% while out of \acrshort{de} mode and around 60\% in \acrshort{de} mode. This seems to be within the maximum utilization of 69\%, calculated in section \ref{sec:max_util}.
+From the traces we can see that bus 0 typically has a utilization of 60-70\% while bus 1 rests at about 30\% while out of \acrshort{de} mode and around 60\% in \acrshort{de} mode. This is within the maximum utilization of 69\%, calculated in section \ref{sec:max_util}. Bus 0 is mostly within the limit, but has peaks as high as 79\%, this means it is likely to have loss of packets.
 
 we know that to ensure that no frames are dropped (i.e. all deadlines are met) the bus utilization should be no more than 69\%. For bus 1, this seems to be in order. The trace tells us that the peak utilization is 71.3\%, but this is an outlier and probably not an issue. However, bus 0 seems to have a somewhat high bus load continuously, staying around 70\% load with peaks as high as 79.1\%. This is an area that can be improved.
 
